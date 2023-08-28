@@ -1,3 +1,0 @@
-Name: Rohit
-Skills: HTML, CSS, JS, Next.js
-Email: Rohitfatehpur007@gmail.com
