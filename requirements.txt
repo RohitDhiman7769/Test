@@ -1,129 +1,404 @@
-aiofiles==23.1.0
-aiohttp==3.8.4
-aioresponses==0.7.4
-aleph_alpha_client==3.2.0
-apify_client==1.3.1
-asyncer==0.0.2
-atlassian==0.0.0
-auth0_python==4.4.0
-azure_storage==0.37.0
-beautifulsoup4==4.12.2
-bibtexparser==1.4.0
-bilibili_api==9.1.0
-boto3==1.26.159
-chainlit==0.6.1
-chromadb==0.3.26
-click==8.1.3
-couchdb3==1.2.0
-databricks==0.2
-dataclasses_json==0.5.8
-deepspeed==0.10.0
-diskcache==5.6.1
-docarray==0.37.0
-docx2txt==0.8
-duckduckgo_search==3.8.4
-ebooklib==0.18
-fastapi==0.101.0
-fastapi_socketio==0.0.10
-feedly==0.11.3
-feedparser==6.0.10
-filetype==1.2.0
-firebase_admin==6.2.0
-fitz==0.0.1.dev2
-geopy==2.3.0
-gkeepapi==0.14.2
-google_api_python_client==2.95.0
-google_auth_oauthlib==1.0.0
-googlemaps==4.10.0
-gptcache==0.1.36
-gql==3.4.1
-html2text==2020.1.16
-httpx==0.24.1
-huggingface_hub==0.16.4
-InstructorEmbedding==1.0.1
-ipykernel==6.25.0
-ipython==8.14.0
-jsonschema==4.18.6
-langchain==0.0.253
-llama_hub==0.0.18
-lxml==4.9.3
-matplotlib==3.7.2
-metal_sdk==2.0.1
-modelscope==1.8.1
-msal==1.22.0
-nbconvert==7.7.3
-neo4j==5.11.0
-nest_asyncio==1.5.6
-nltk==3.8.1
-numpy==1.25.1
-odps==3.5.1
-openapi_schema_pydantic==1.2.4
-opendal==0.39.0
-osmxtract==0.0.1
-pandas==2.0.2
-pandasai==0.8.2
-pdf2image==1.16.3
-pdfminer==20191125
-pexpect==4.8.0
-Pillow==9.5.0
-Pillow==10.0.0
-pinecone_text==0.5.2
-platformdirs==3.10.0
-playwright==1.36.0
-praw==7.7.1
-protobuf==4.23.4
-pyairtable==2.0.0
-pydantic==1.10.11
-pydrive==1.3.1
-pydub==0.25.1
-pygtrie==2.5.0
-pymilvus==2.2.14
-pymongo==4.4.1
-pymysql==1.1.0
-pyowm==3.3.0
-pyparsing==3.1.1
-pypdf==3.15.0
-pyspark==3.4.1
-pytesseract==0.3.10
-pytest==7.4.0
-python-dotenv==1.0.0
-python-socketio==5.8.0
-python_graphql_client==0.4.3
-PyYAML==6.0
-PyYAML==6.0.1
-qdrant_client==1.4.0
-rdflib==7.0.0
-regex==2023.6.3
-reportlab==4.0.4
-responses==0.23.3
-retrying==1.3.4
-scikit_learn==1.3.0
-sentence_transformers==2.2.2
-sentencepiece==0.1.99
-slack_sdk==3.21.3
-snscrape==0.7.0.20230622
-spacy==3.6.0
-spotipy==2.23.0
-SQLAlchemy==2.0.19
-starlette==0.31.0
-svglib==1.5.1
-syncer==2.0.3
-tenacity==8.2.2
-tensorflow_hub==0.14.0
-tensorflow_text==2.13.0
-tiktoken==0.4.0
-tomli==2.0.1
-torch==2.0.1
-tqdm==4.65.0
-trafilatura==1.6.1
-tweepy==4.14.0
-typing_extensions==4.7.1
-uptrace==1.19.0
-uvicorn==0.23.2
-watchfiles==0.19.0
-whisper==1.1.10
-xlrd==2.0.1
-yelpapi==2.5.0
-youtube_search==2.1.2
-youtube_transcript_api==0.6.1
-zep_python==0.34
+import { useState } from 'react';
+import axios from 'axios'
+import './App.css';
+
+function App() {
+
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  const [isDataModalOpen, setIsDataModalOpen] = useState(false)
+  const [isInfo, setIsInfo] = useState(true)
+  const [isOpenAddProductModal, setIsOpenAddProductMdal] = useState(false)
+  const [afterSaveProduct, setAfterSaveProduct] = useState(false)
+
+  const [fetchedData, setFetchData] = useState([]);
+  const [editMode, setEditMode] = useState({});
+
+  const [userPersonalDetails, setUserPersonalDetails] = useState({ username: '', userdiscription: '', usercountry: '', userstate: '', userpincode: '' })
+
+  const [userProductInput, setUserProductInput] = useState({ serialNumber: '', productName: '', Price: '', quantity: '' })
+  const [userPeroductDataList, setUserProductDataList] = useState([])
+
+  const [isEditing, setIsEditing] = useState(null);
+
+  const [productInputLabels, setProductInputLabels] = useState(false)
+  console.log('userPeroductDataList', userPeroductDataList)
+
+  //GET VALUE OF USER PERSONAL INPUT
+  function handleUserInput(e) {
+    const { name, value } = e.target
+    setUserPersonalDetails((usersdata) => ({
+      ...usersdata,
+      [name]: value
+    }))
+  }
+
+  // CALL SUBMIT BUTTON TO SEND ALL DATA INTO BACKEND
+  async function submitdata() {
+    setProductInputLabels(false)
+    setIsProductModalOpen(false)
+    setIsOpenAddProductMdal(false)
+    setProductInputLabels(false)
+    try {
+
+      const dataToSend = {
+        userPersonalDetails: userPersonalDetails,
+        userPeroductDataList: userPeroductDataList,
+      };
+
+      const response = await axios.post('http://localhost:3001/Data-inserted',
+        dataToSend,
+        {
+          headers: {
+            'content-type': 'application/json'
+          },
+        }
+      )
+      console.log(response)
+    } catch (err) {
+      console.log(err)
+    }
+    setUserProductDataList([])
+  }
+
+
+  const toggleEditMode = (index) => {
+    setEditMode((prevState) => ({
+      ...prevState,
+      [index]: !prevState[index],
+    }));
+  };
+
+  //
+  const handleInputChange = (index, fieldName, value) => {
+    const updatedData = [...fetchedData];
+    updatedData[index][fieldName] = value;
+    setFetchData(updatedData);
+  };
+
+  //DELETE NOTES FUNCTION
+  const deleteItem = (index) => {
+    const updatedData = [...fetchedData];
+    updatedData.splice(index, 1);
+    setFetchData(updatedData);
+  };
+
+  // TO CANCEL FUNCTION
+  const cancelEdit = (index) => {
+    toggleEditMode(index);
+    // console.log(index)
+  }
+
+  //SAVE CHANGES FUNCTION
+  const saveChanges = (index) => {
+    toggleEditMode(index);
+  }
+
+
+  //ADD PRODUCT FUCNTION
+  function addProduct() {
+    setIsProductModalOpen(true)
+    setIsOpenAddProductMdal(true)
+    setProductInputLabels(true)
+  }
+
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setUserProductInput((prevData) => ({
+      ...prevData,
+      [name]: value
+    }))
+  }
+
+  //SAVE PRODUCT INFO AFTER EDIT
+  function saveProduct(e) {
+    e.preventDefault()
+    setIsEditing(null)
+    setIsOpenAddProductMdal(false)
+    setAfterSaveProduct(true)
+    const newData = { ...userProductInput }
+    setUserProductDataList((prevList) => [...prevList, newData])
+    setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
+  }
+
+  //ADD PRODUCT MODAL
+  const AddProductModal = () => {
+    return (
+      <div>
+        <table>
+          <tr>
+            <th>
+
+            </th>
+          </tr>
+          <tr>
+            <td>
+              <div style={{ display: "flex" }}>
+                <div className='addproductInput'>
+                  <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}  ></input>
+                  <input name='productName' value={userProductInput.productName} className='productInput' type="text" placeholder='Product Name' onChange={handleChange} ></input>
+                  <input name='Price' value={userProductInput.Price} className='productInput' type="number" placeholder='Price' onChange={handleChange}></input>
+                  <input name='quantity' value={userProductInput.quantity} className='productInput' type="number" placeholder='Quantity' onChange={handleChange}></input>
+                  <button onClick={saveProduct}>Save</button>
+                </div>
+              </div >
+            </td>
+          </tr>
+        </table>
+      </div>
+
+    )
+  }
+
+
+  //EDIT PRODUCT INPUT AFTER SAVE
+  function handleEdit(index) {
+    setIsEditing(index);
+    console.log('isEditing', isEditing)
+    setUserProductInput(userPeroductDataList[index]);
+  }
+
+  //DELETE AFTER EDIT
+  function handleDelete(index) {
+    const updatedUserPeroductDataList = [...userPeroductDataList]
+    updatedUserPeroductDataList.splice(index, 1);
+    setUserProductDataList(updatedUserPeroductDataList);
+  }
+
+  //PRODUCT MODEL
+  const Productmodal = () => {
+    return (
+      <div>
+        <form>
+          <div className='fetchedDataSection'>
+            <div>
+              {isOpenAddProductModal && <AddProductModal />}
+            </div>
+          </div>
+        </form>
+
+        {userPeroductDataList.map((Value, Index) => {
+          return (
+            isEditing === Index ? (
+
+              <div style={{ display: "flex" }}>
+                <div className='addproductInput'>
+                  <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}></input>
+                  <input name='productName' value={userProductInput.productName} className='productInput' type="text" placeholder='Product Name' onChange={handleChange}></input>
+                  <input name='Price' value={userProductInput.Price} className='productInput' type="number" placeholder='Price' onChange={handleChange}></input>
+                  <input name='quantity' value={userProductInput.quantity} className='productInput' type="number" placeholder='Quantity' onChange={handleChange}></input>
+                  <button onClick={saveProduct}>Save</button>
+                </div>
+              </div>
+
+            )
+              :
+              (
+                afterSaveProduct && (
+                  <div style={{ display: 'flex' }}>
+                    <div key={Index} className='savedProductData'>
+                      <p>{Value.serialNumber}</p>
+                      <p>{Value.productName}</p>
+                      <p>{Value.Price}</p>
+                      <p>{Value.quantity}</p>
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                      <button onClick={() => handleEdit(Index)}>Edit</button>
+                      <button onClick={() => handleDelete(Index)}>Delete</button>
+                    </div>
+                  </div>
+                )
+              )
+          );
+        })}
+      </div>
+    );
+  };
+
+
+
+  //USER DATA FETCHED FUNCTION
+  async function checkData() {
+    setIsInfo(false)
+    setIsDataModalOpen(true)
+    try {
+
+      const response = await axios.get('http://localhost:3001/Fetch-Data',)
+      setFetchData(response.data)
+
+    } catch (err) {
+      console.log(err)
+    }
+  }
+
+  //FETCHED USER DATA MODEL
+  // const Datamodal = () => {
+  //   return (
+  //     <div>
+  //       {(isInfo === true) ?
+  //         // IF NO DATA LABEL
+  //         <div>
+  //           <p>No Data Found</p>
+  //         </div>
+  //         :
+  //         // FETCHED DATA LABEL
+  //         <div className='dataContainer'>
+  //           <table>
+  //             <tr>
+  //               {/* DATA HEADER */}
+  //               <th>
+  //                 <div className='label'>
+  //                   <p>Name</p>
+  //                   <p>Discription</p>
+  //                   <p>Country</p>
+  //                   <p>State</p>
+  //                   <p>Pin Code</p>
+  //                   <p>Serial Number</p>
+  //                   <p>Product Name</p>
+  //                   <p>Price</p>
+  //                   <p>Quantity</p>
+  //                 </div>
+  //               </th>
+  //             </tr>
+  //             <tr>
+  //               <td>
+  //                 {/* USER FETCHED dATA */}
+  //                 {fetchedData.length && fetchedData.map((data, index) => {
+  //                   return (
+  //                     <div key={index} className='userData'>
+  //                       {(editMode[index]) ?
+
+  //                         <div className='fetcheduserdata'>
+  //                           <tr>
+
+  //                             <div style={{ display: 'flex', height: '20px' }}>
+  //                               <input value={data.userName} className='fetchedDataInput' onChange={(e) => handleInputChange(index, 'userName', e.target.value)}></input>
+  //                               <input value={data.userDiscription} className='fetchedDataInput'></input>
+  //                               <input value={data.userCountry} className='fetchedDataInput'></input>
+  //                               <input value={data.userState} className='fetchedDataInput'></input>
+  //                               <input value={data.userPincode} className='fetchedDataInput'></input>
+  //                               <input value={data.serialNumber} className='fetchedDataInput'></input>
+  //                               <input value={data.productName} className='fetchedDataInput'></input>
+  //                               <input value={data.price} className='fetchedDataInput'></input>
+  //                               <input value={data.quantity} className='fetchedDataInput'></input>
+  //                             </div>
+  //                             <div>
+
+  //                               <button onClick={() => saveChanges(index)}>Save</button>
+  //                               <button onClick={() => cancelEdit(index)}>Cancel</button>
+
+  //                             </div>
+  //                           </tr>
+  //                         </div>
+  //                         :
+  //                         (
+  //                           <div style={{ display: 'flex' }}>
+  //                             <div style={{ display: 'flex' }}>
+  //                               <p className='fetchedDataInputLabel' >{data.userName}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.userDiscription}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.userCountry}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.userState}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.userPincode}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.serialNumber}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.productName}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.price}</p>
+  //                               <p className='fetchedDataInputLabel'>{data.quantity} </p>
+  //                             </div>
+  //                             <div>
+  //                               {/* <button>Save</button> */}
+  //                               <button onClick={() => toggleEditMode(index)}>Edit</button>
+  //                               <button onClick={() => deleteItem(index)}>Delete</button>
+  //                             </div>
+  //                           </div>
+  //                         )
+  //                       }
+  //                     </div>
+  //                   );
+  //                 })}
+
+
+  //               </td>
+  //             </tr>
+  //           </table>
+
+  //         </div>
+  //       }
+  //     </div >)
+  // }
+
+
+  return (
+    <div className="container">
+      <div className='main' >
+        <form>
+          <div className='userInputSection'>
+            <div className='userinput'>
+              <label>Name</label>
+              <input name='username' placeholder='Name' onChange={handleUserInput}></input>
+            </div>
+            <div className='userinput'>
+              <label>Discription</label>
+              <input name='userdiscription' placeholder='Discription' onChange={handleUserInput}></input>
+
+            </div>
+            <div className='userinput'>
+              <label>Country</label>
+              <input name='usercountry' placeholder='Country' onChange={handleUserInput} ></input>
+            </div>
+            <div className='userinput'>
+              <label>State</label>
+              <input name='userstate' placeholder='State' onChange={handleUserInput}></input>
+            </div>
+            <div className='userinput'>
+              <label>Pin Code</label>
+              <input name='userpincode' placeholder='Pin Code' onChange={handleUserInput}></input>
+            </div>
+          </div>
+        </form>
+
+        <div >
+          <div>
+
+            {/* PRODUCT ADD BUTTON */}
+            <button onClick={addProduct} className='productBtn'>Add Product+</button>
+          </div>
+
+          {productInputLabels &&
+            <div className='productLabel' >
+              <p>S.no</p>
+              <p>Product Name</p>
+              <p>Price</p>
+              <p>Qt.</p>
+              <p>Status</p>
+            </div>
+          }
+
+          {/* ADD PRODUCT MODAL SECTION */}
+          {isProductModalOpen &&
+            <Productmodal />
+          }
+        </div>
+
+      </div>
+
+
+      <div className='submitBtn'>
+        {/* FORM SUBMIT BUTTON */}
+        <button onClick={submitdata}>Submit</button>
+      </div>
+
+
+
+      {/* FETCH DATA BUTTON */}
+      <button onClick={checkData} className='viewDatabtn'>View Data</button>
+
+      {/* {isDataModalOpen &&
+        <Datamodal />
+      } */}
+
+    </div>
+  );
+}
+
+export default App;
+
