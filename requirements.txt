@@ -1,17 +1,18 @@
 import { useState } from 'react';
 import axios from 'axios'
 import './App.css';
+import ProductComp from './ProductComp';
 
 function App() {
 
   const [isProductModalOpen, setIsProductModalOpen] = useState(false)
-  const [isDataModalOpen, setIsDataModalOpen] = useState(false)
-  const [isInfo, setIsInfo] = useState(true)
+  // const [isDataModalOpen, setIsDataModalOpen] = useState(false)
+  // const [isInfo, setIsInfo] = useState(true)
   const [isOpenAddProductModal, setIsOpenAddProductMdal] = useState(false)
   const [afterSaveProduct, setAfterSaveProduct] = useState(false)
 
-  const [fetchedData, setFetchData] = useState([]);
-  const [editMode, setEditMode] = useState({});
+  // const [fetchedData, setFetchData] = useState([]);
+  // const [editMode, setEditMode] = useState({});
 
   const [userPersonalDetails, setUserPersonalDetails] = useState({ username: '', userdiscription: '', usercountry: '', userstate: '', userpincode: '' })
 
@@ -23,6 +24,8 @@ function App() {
   const [productInputLabels, setProductInputLabels] = useState(false)
   console.log('userPeroductDataList', userPeroductDataList)
 
+  const [addProductComp, setAddProductComp] = useState([])
+
   //GET VALUE OF USER PERSONAL INPUT
   function handleUserInput(e) {
     const { name, value } = e.target
@@ -30,6 +33,26 @@ function App() {
       ...usersdata,
       [name]: value
     }))
+  }
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    console.log('name is', name)
+    console.log('value is ', value)
+    setUserProductInput((prevData) => ({
+      ...prevData,
+      [name]: value
+    }))
+  }
+
+  function saveProduct(e) {
+    e.preventDefault()
+    setIsEditing(null)
+    setIsOpenAddProductMdal(false)
+    setAfterSaveProduct(true)
+    const newData = { ...userProductInput }
+    setUserProductDataList((prevList) => [...prevList, newData])
+    setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
   }
 
   // CALL SUBMIT BUTTON TO SEND ALL DATA INTO BACKEND
@@ -60,38 +83,43 @@ function App() {
     setUserProductDataList([])
   }
 
+  // TO CLOSE ADD PRODUCT COMPONENT
 
-  const toggleEditMode = (index) => {
-    setEditMode((prevState) => ({
-      ...prevState,
-      [index]: !prevState[index],
-    }));
-  };
+  function cancelAddProductCompFun(ID){
+    setAddProductComp(addProductComp.filter((id)=> id !== ID));
+  }
+
+  // const toggleEditMode = (index) => {
+  //   setEditMode((prevState) => ({
+  //     ...prevState,
+  //     [index]: !prevState[index],
+  //   }));
+  // };
 
   //
-  const handleInputChange = (index, fieldName, value) => {
-    const updatedData = [...fetchedData];
-    updatedData[index][fieldName] = value;
-    setFetchData(updatedData);
-  };
+  // const handleInputChange = (index, fieldName, value) => {
+  //   const updatedData = [...fetchedData];
+  //   updatedData[index][fieldName] = value;
+  //   setFetchData(updatedData);
+  // };
 
   //DELETE NOTES FUNCTION
-  const deleteItem = (index) => {
-    const updatedData = [...fetchedData];
-    updatedData.splice(index, 1);
-    setFetchData(updatedData);
-  };
+  // const deleteItem = (index) => {
+  //   const updatedData = [...fetchedData];
+  //   updatedData.splice(index, 1);
+  //   setFetchData(updatedData);
+  // };
 
   // TO CANCEL FUNCTION
-  const cancelEdit = (index) => {
-    toggleEditMode(index);
-    // console.log(index)
-  }
+  // const cancelEdit = (index) => {
+  //   toggleEditMode(index);
+  //   // console.log(index)
+  // }
 
   //SAVE CHANGES FUNCTION
-  const saveChanges = (index) => {
-    toggleEditMode(index);
-  }
+  // const saveChanges = (index) => {
+  //   toggleEditMode(index);
+  // }
 
 
   //ADD PRODUCT FUCNTION
@@ -99,63 +127,38 @@ function App() {
     setIsProductModalOpen(true)
     setIsOpenAddProductMdal(true)
     setProductInputLabels(true)
+
+    const modalId = new Date().getTime().toString();
+    setAddProductComp([...addProductComp, modalId])
+
   }
 
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    setUserProductInput((prevData) => ({
-      ...prevData,
-      [name]: value
-    }))
-  }
+
 
   //SAVE PRODUCT INFO AFTER EDIT
-  function saveProduct(e) {
-    e.preventDefault()
-    setIsEditing(null)
-    setIsOpenAddProductMdal(false)
-    setAfterSaveProduct(true)
-    const newData = { ...userProductInput }
-    setUserProductDataList((prevList) => [...prevList, newData])
-    setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
-  }
+  // function saveProduct(e) {
+  //   e.preventDefault()
+  //   setIsEditing(null)
+  //   setIsOpenAddProductMdal(false)
+  //   setAfterSaveProduct(true)
+  //   const newData = { ...userProductInput }
+  //   setUserProductDataList((prevList) => [...prevList, newData])
+  //   setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
+  // }
 
   //ADD PRODUCT MODAL
-  const AddProductModal = () => {
-    return (
-      <div>
-        <table>
-          <tr>
-            <th>
-
-            </th>
-          </tr>
-          <tr>
-            <td>
-              <div style={{ display: "flex" }}>
-                <div className='addproductInput'>
-                  <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}  ></input>
-                  <input name='productName' value={userProductInput.productName} className='productInput' type="text" placeholder='Product Name' onChange={handleChange} ></input>
-                  <input name='Price' value={userProductInput.Price} className='productInput' type="number" placeholder='Price' onChange={handleChange}></input>
-                  <input name='quantity' value={userProductInput.quantity} className='productInput' type="number" placeholder='Quantity' onChange={handleChange}></input>
-                  <button onClick={saveProduct}>Save</button>
-                </div>
-              </div >
-            </td>
-          </tr>
-        </table>
-      </div>
-
-    )
-  }
+  // const AddProductModal = () => {
+  //   return (
+  //   )
+  // }
 
 
   //EDIT PRODUCT INPUT AFTER SAVE
   function handleEdit(index) {
     setIsEditing(index);
     console.log('isEditing', isEditing)
-    setUserProductInput(userPeroductDataList[index]);
+    // setUserProductInput(userPeroductDataList[index]);
   }
 
   //DELETE AFTER EDIT
@@ -172,7 +175,7 @@ function App() {
         <form>
           <div className='fetchedDataSection'>
             <div>
-              {isOpenAddProductModal && <AddProductModal />}
+              {isOpenAddProductModal && <ProductComp />}
             </div>
           </div>
         </form>
@@ -183,11 +186,11 @@ function App() {
 
               <div style={{ display: "flex" }}>
                 <div className='addproductInput'>
-                  <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}></input>
+                  {/* <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}></input>
                   <input name='productName' value={userProductInput.productName} className='productInput' type="text" placeholder='Product Name' onChange={handleChange}></input>
                   <input name='Price' value={userProductInput.Price} className='productInput' type="number" placeholder='Price' onChange={handleChange}></input>
                   <input name='quantity' value={userProductInput.quantity} className='productInput' type="number" placeholder='Quantity' onChange={handleChange}></input>
-                  <button onClick={saveProduct}>Save</button>
+                  <button onClick={saveProduct}>Save</button> */}
                 </div>
               </div>
 
@@ -219,12 +222,13 @@ function App() {
 
   //USER DATA FETCHED FUNCTION
   async function checkData() {
-    setIsInfo(false)
-    setIsDataModalOpen(true)
+    // setIsInfo(false)
+    // setIsDataModalOpen(true)
     try {
 
       const response = await axios.get('http://localhost:3001/Fetch-Data',)
-      setFetchData(response.data)
+      // setFetchData(response.data)
+      console.log(response)
 
     } catch (err) {
       console.log(err)
@@ -374,8 +378,14 @@ function App() {
           }
 
           {/* ADD PRODUCT MODAL SECTION */}
-          {isProductModalOpen &&
-            <Productmodal />
+          {/* {isProductModalOpen &&
+            <ProductComp  isEditing={setIsEditing}/>
+          } */}
+
+          {addProductComp.map((ID) => (
+            <ProductComp key={ID} isEditing={setIsEditing} cancelProductComp={cancelAddProductCompFun} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={handleChange} saveProductFunction={saveProduct} serialNumberValue={userProductInput.serialNumber}  productNameValue={userProductInput.productName} priceValue = {userProductInput.Price} quantityValue={userProductInput.quantity} />
+
+          ))
           }
         </div>
 
@@ -402,3 +412,7 @@ function App() {
 
 export default App;
 
+  // Function to close a modal
+//   const closeModal = (modalId) => {
+//     setModals(modals.filter((id) => id !== modalId));
+//   };
