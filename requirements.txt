@@ -8,33 +8,20 @@ function App() {
   //GET VALUE OF USERPERSONAL DETAILS
   const [userPersonalDetails, setUserPersonalDetails] = useState({ username: '', userdiscription: '', usercountry: '', userstate: '', userpincode: '' })
 
-  // const [isProductModalOpen, setIsProductModalOpen] = useState(false)
-  // const [isDataModalOpen, setIsDataModalOpen] = useState(false)
-  // const [isInfo, setIsInfo] = useState(true)
-  // const [isOpenAddProductModal, setIsOpenAddProductMdal] = useState(false)
+  const [saveProductInput, setSaveProductInput] = useState(false)
   const [afterSaveProduct, setAfterSaveProduct] = useState(false)
 
-  // const [fetchedData, setFetchData] = useState([]);
-  // const [editMode, setEditMode] = useState({});
-
-
-  const [userProductInput, setUserProductInput] = useState({ serialNumber: '', productName: '', Price: '', quantity: '' })
+  const [userProductInput, setUserProductInput] = useState([])
   const [userPeroductDataList, setUserProductDataList] = useState([])
-
   const [isEditing, setIsEditing] = useState(null);
-
   const [productInputLabels, setProductInputLabels] = useState(false)
-  console.log('userPeroductDataList', userPeroductDataList)
-
+  
+  //PRODUCT MAP STATE
   const [addProductComp, setAddProductComp] = useState([])
-
-
 
   // CALL SUBMIT BUTTON TO SEND ALL DATA INTO BACKEND
   async function submitdata() {
     setProductInputLabels(false)
-    // setIsProductModalOpen(false)
-    // setIsOpenAddProductMdal(false)
     setProductInputLabels(false)
     try {
 
@@ -68,29 +55,35 @@ function App() {
     }))
   }
 
-    //ADD PRODUCT FUCNTION
-    function addProduct() {
-      // setIsProductModalOpen(true)
-      // setIsOpenAddProductMdal(true)
-      setProductInputLabels(true)
-      const modalId = new Date().getTime().toString();
-      setAddProductComp([...addProductComp, modalId])
-    }
+  //ADD PRODUCT FUCNTION
+  function addProduct() {
+    setProductInputLabels(true);
+    const modalId = new Date().getTime().toString();
+    const newArray = [...addProductComp];
+    newArray.push({ product_name: '' });
+    setAddProductComp(newArray);
+  }
 
   // GET VALUE OF USER PRODUCTS
-  const handleChange = (e) => {
+  const handleChange = (e,index) => { 
     const { name, value } = e.target
     setUserProductInput((prevData) => ({
       ...prevData,
-      [name]: value
+      [index]:{
+        ...prevData[index],
+        [name]:value
+
+      }
     }))
-  }
+  }  
+
 
   //SAVE AFTER SET THE PRODUCT VALUES
   function saveProduct(e) {
     e.preventDefault()
-    // setIsEditing(null)
+    setIsEditing(null)
     // setIsOpenAddProductMdal(false)
+    setSaveProductInput(true)
     setAfterSaveProduct(true)
     const newData = { ...userProductInput }
     setUserProductDataList((prevList) => [...prevList, newData])
@@ -99,55 +92,10 @@ function App() {
 
 
   // TO CLOSE ADD PRODUCT COMPONENT
-  function cancelAddProductCompFun(compId) {
-    setAddProductComp(addProductComp.filter((id) => id !== compId));
+  function cancelAddProductCompFun(Index, item) {
+    console.log(item)
+    setAddProductComp(addProductComp.filter((id) => id !== Index));
   }
-
-
-
-  // const toggleEditMode = (index) => {
-  //   setEditMode((prevState) => ({
-  //     ...prevState,
-  //     [index]: !prevState[index],
-  //   }));
-  // };
-
-  //
-  // const handleInputChange = (index, fieldName, value) => {
-  //   const updatedData = [...fetchedData];
-  //   updatedData[index][fieldName] = value;
-  //   setFetchData(updatedData);
-  // };
-
-  //DELETE NOTES FUNCTION
-  // const deleteItem = (index) => {
-  //   const updatedData = [...fetchedData];
-  //   updatedData.splice(index, 1);
-  //   setFetchData(updatedData);
-  // };
-
-  // TO CANCEL FUNCTION
-  // const cancelEdit = (index) => {
-  //   toggleEditMode(index);
-  //   // console.log(index)
-  // }
-
-  //SAVE CHANGES FUNCTION
-  // const saveChanges = (index) => {
-  //   toggleEditMode(index);
-  // }
-
-
-  //SAVE PRODUCT INFO AFTER EDIT
-  // function saveProduct(e) {
-  //   e.preventDefault()
-  //   setIsEditing(null)
-  //   setIsOpenAddProductMdal(false)
-  //   setAfterSaveProduct(true)
-  //   const newData = { ...userProductInput }
-  //   setUserProductDataList((prevList) => [...prevList, newData])
-  //   setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
-  // }
 
 
 
@@ -176,41 +124,39 @@ function App() {
   //   </div>
   // </form>
 
-  {userPeroductDataList.map((Value, Index) => {
-    return (
-      isEditing === Index ? (
+  { saveProductInput  &&
+    userProductInput.map((Value, Index) => {
+      return (
+        isEditing === Index ? (
 
-        <div style={{ display: "flex" }}>
-          <div className='addproductInput'>
-            {/* <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}></input>
-            <input name='productName' value={userProductInput.productName} className='productInput' type="text" placeholder='Product Name' onChange={handleChange}></input>
-            <input name='Price' value={userProductInput.Price} className='productInput' type="number" placeholder='Price' onChange={handleChange}></input>
-            <input name='quantity' value={userProductInput.quantity} className='productInput' type="number" placeholder='Quantity' onChange={handleChange}></input>
-            <button onClick={saveProduct}>Save</button> */}
-          </div>
-        </div>
-
-      )
-        :
-        (
-          afterSaveProduct && (
-            <div style={{ display: 'flex' }}>
-              <div key={Index} className='savedProductData'>
-                <p>{Value.serialNumber}</p>
-                <p>{Value.productName}</p>
-                <p>{Value.Price}</p>
-                <p>{Value.quantity}</p>
-              </div>
-              <div style={{ display: 'flex' }}>
-                <button onClick={() => handleEdit(Index)}>Edit</button>
-                <button onClick={() => handleDelete(Index)}>Delete</button>
-              </div>
+          <div style={{ display: "flex" }}>
+            <div className='addproductInput'>
+               <ProductComp />
             </div>
-          )
+          </div>
+
         )
-    );
-  })}
-// </div>
+          :
+          (
+            afterSaveProduct && (
+              <div style={{ display: 'flex' }}>
+                <div key={Index} className='savedProductData'>
+                  <p>{Value.serialNumber}</p>
+                  <p>{Value.productName}</p>
+                  <p>{Value.Price}</p>
+                  <p>{Value.quantity}</p>
+                </div>
+                <div style={{ display: 'flex' }}>
+                  <button onClick={() => handleEdit(Index)}>Edit</button>
+                  <button onClick={() => handleDelete(Index)}>Delete</button>
+                </div>
+              </div>
+            )
+          )
+      );
+    })
+  }
+  // </div>
 
 
 
@@ -228,6 +174,95 @@ function App() {
       console.log(err)
     }
   }
+
+
+
+
+  return (
+    <div className="container">
+      <div className='main' >
+        <form>
+          <div className='userInputSection'>
+            <div className='userinput'>
+              <label>Name</label>
+              <input name='username' placeholder='Name' onChange={handleUserInput}></input>
+            </div>
+            <div className='userinput'>
+              <label>Discription</label>
+              <input name='userdiscription' placeholder='Discription' onChange={handleUserInput}></input>
+
+            </div>
+            <div className='userinput'>
+              <label>Country</label>
+              <input name='usercountry' placeholder='Country' onChange={handleUserInput} ></input>
+            </div>
+            <div className='userinput'>
+              <label>State</label>
+              <input name='userstate' placeholder='State' onChange={handleUserInput}></input>
+            </div>
+            <div className='userinput'>
+              <label>Pin Code</label>
+              <input name='userpincode' placeholder='Pin Code' onChange={handleUserInput}></input>
+            </div>
+          </div>
+        </form>
+
+        <div >
+          <div>
+
+            {/* PRODUCT ADD BUTTON */}
+            <button onClick={addProduct} className='productBtn'>Add Product+</button>
+          </div>
+          {productInputLabels &&
+            <div className='productLabel'>
+              <p>Serial No.</p>
+              <p>Product Name</p>
+              <p>Price</p>
+              <p>Quantity</p>
+              <p>Status</p>
+            </div>
+          }
+
+          <table>
+            <tbody>
+
+              {addProductComp.map((item, index) => (
+                <tr key={index}>
+                  <ProductComp key={index} isEditing={setIsEditing} cancelProductComp={() => cancelAddProductCompFun(index, item)} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={(e)=>{handleChange(e,index)}} saveProductFunction={saveProduct} serialNumberValue={item} />
+                </tr>
+              ))
+              }
+
+            </tbody>
+          </table>
+
+
+
+        </div>
+      </div>
+
+
+      <div className='submitBtn'>
+        {/* FORM SUBMIT BUTTON */}
+        <button onClick={submitdata}>Submit</button>
+      </div>
+
+
+
+      {/* FETCH DATA BUTTON */}
+      <button onClick={checkData} className='viewDatabtn'>View Data</button>
+
+      {/* {isDataModalOpen &&
+        <Datamodal />
+      } */}
+
+    </div>
+  );
+}
+
+export default App;
+
+// serialNumber} productNameValue={userProductInput.productName} priceValue={userProductInput.Price} quantityValue={userProductInput.quantity}
 
   //FETCHED USER DATA MODEL
   // const Datamodal = () => {
@@ -325,88 +360,49 @@ function App() {
   // }
 
 
-  return (
-    <div className="container">
-      <div className='main' >
-        <form>
-          <div className='userInputSection'>
-            <div className='userinput'>
-              <label>Name</label>
-              <input name='username' placeholder='Name' onChange={handleUserInput}></input>
-            </div>
-            <div className='userinput'>
-              <label>Discription</label>
-              <input name='userdiscription' placeholder='Discription' onChange={handleUserInput}></input>
 
-            </div>
-            <div className='userinput'>
-              <label>Country</label>
-              <input name='usercountry' placeholder='Country' onChange={handleUserInput} ></input>
-            </div>
-            <div className='userinput'>
-              <label>State</label>
-              <input name='userstate' placeholder='State' onChange={handleUserInput}></input>
-            </div>
-            <div className='userinput'>
-              <label>Pin Code</label>
-              <input name='userpincode' placeholder='Pin Code' onChange={handleUserInput}></input>
-            </div>
-          </div>
-        </form>
+  // const toggleEditMode = (index) => {
+  //   setEditMode((prevState) => ({
+  //     ...prevState,
+  //     [index]: !prevState[index],
+  //   }));
+  // };
 
-        <div >
-          <div>
+  //
+  // const handleInputChange = (index, fieldName, value) => {
+  //   const updatedData = [...fetchedData];
+  //   updatedData[index][fieldName] = value;
+  //   setFetchData(updatedData);
+  // };
 
-            {/* PRODUCT ADD BUTTON */}
-            <button onClick={addProduct} className='productBtn'>Add Product+</button>
-          </div>
+  //DELETE NOTES FUNCTION
+  // const deleteItem = (index) => {
+  //   const updatedData = [...fetchedData];
+  //   updatedData.splice(index, 1);
+  //   setFetchData(updatedData);
+  // };
 
-          {productInputLabels &&
-            <div className='productLabel' >
-              <p>S.no</p>
-              <p>Product Name</p>
-              <p>Price</p>
-              <p>Qt.</p>
-              <p>Status</p>
-            </div>
-          }
+  // TO CANCEL FUNCTION
+  // const cancelEdit = (index) => {
+  //   toggleEditMode(index);
+  //   // console.log(index)
+  // }
 
-          {/* ADD PRODUCT MODAL SECTION */}
-          {/* {isProductModalOpen &&
-            <ProductComp  isEditing={setIsEditing}/>
-          } */}
-
-          {addProductComp.map((Id) => (
-            <ProductComp key={Id} isEditing={setIsEditing} cancelProductComp={() => cancelAddProductCompFun(Id)} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={handleChange} saveProductFunction={saveProduct} serialNumberValue={userProductInput.serialNumber} productNameValue={userProductInput.productName} priceValue={userProductInput.Price} quantityValue={userProductInput.quantity} />
-
-          ))
-          }
-        </div>
-
-      </div>
+  //SAVE CHANGES FUNCTION
+  // const saveChanges = (index) => {
+  //   toggleEditMode(index);
+  // }
 
 
-      <div className='submitBtn'>
-        {/* FORM SUBMIT BUTTON */}
-        <button onClick={submitdata}>Submit</button>
-      </div>
+  //SAVE PRODUCT INFO AFTER EDIT
+  // function saveProduct(e) {
+  //   e.preventDefault()
+  //   setIsEditing(null)
+  //   setIsOpenAddProductMdal(false)
+  //   setAfterSaveProduct(true)
+  //   const newData = { ...userProductInput }
+  //   setUserProductDataList((prevList) => [...prevList, newData])
+  //   setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
+  // }
 
 
-
-      {/* FETCH DATA BUTTON */}
-      <button onClick={checkData} className='viewDatabtn'>View Data</button>
-
-      {/* {isDataModalOpen &&
-        <Datamodal />
-      } */}
-
-    </div>
-  );
-}
-
-export default App;
-
-// Function to close a modal
-//   const closeModal = (modalId) => {
-//     setModals(modals.filter((id) => id !== modalId));
-//   };
