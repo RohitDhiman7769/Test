@@ -5,16 +5,18 @@ import ProductComp from './ProductComp';
 
 function App() {
 
-  const [isProductModalOpen, setIsProductModalOpen] = useState(false)
+  //GET VALUE OF USERPERSONAL DETAILS
+  const [userPersonalDetails, setUserPersonalDetails] = useState({ username: '', userdiscription: '', usercountry: '', userstate: '', userpincode: '' })
+
+  // const [isProductModalOpen, setIsProductModalOpen] = useState(false)
   // const [isDataModalOpen, setIsDataModalOpen] = useState(false)
   // const [isInfo, setIsInfo] = useState(true)
-  const [isOpenAddProductModal, setIsOpenAddProductMdal] = useState(false)
+  // const [isOpenAddProductModal, setIsOpenAddProductMdal] = useState(false)
   const [afterSaveProduct, setAfterSaveProduct] = useState(false)
 
   // const [fetchedData, setFetchData] = useState([]);
   // const [editMode, setEditMode] = useState({});
 
-  const [userPersonalDetails, setUserPersonalDetails] = useState({ username: '', userdiscription: '', usercountry: '', userstate: '', userpincode: '' })
 
   const [userProductInput, setUserProductInput] = useState({ serialNumber: '', productName: '', Price: '', quantity: '' })
   const [userPeroductDataList, setUserProductDataList] = useState([])
@@ -26,40 +28,13 @@ function App() {
 
   const [addProductComp, setAddProductComp] = useState([])
 
-  //GET VALUE OF USER PERSONAL INPUT
-  function handleUserInput(e) {
-    const { name, value } = e.target
-    setUserPersonalDetails((usersdata) => ({
-      ...usersdata,
-      [name]: value
-    }))
-  }
 
-  const handleChange = (e) => {
-    const { name, value } = e.target
-    console.log('name is', name)
-    console.log('value is ', value)
-    setUserProductInput((prevData) => ({
-      ...prevData,
-      [name]: value
-    }))
-  }
-
-  function saveProduct(e) {
-    e.preventDefault()
-    setIsEditing(null)
-    setIsOpenAddProductMdal(false)
-    setAfterSaveProduct(true)
-    const newData = { ...userProductInput }
-    setUserProductDataList((prevList) => [...prevList, newData])
-    setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
-  }
 
   // CALL SUBMIT BUTTON TO SEND ALL DATA INTO BACKEND
   async function submitdata() {
     setProductInputLabels(false)
-    setIsProductModalOpen(false)
-    setIsOpenAddProductMdal(false)
+    // setIsProductModalOpen(false)
+    // setIsOpenAddProductMdal(false)
     setProductInputLabels(false)
     try {
 
@@ -83,11 +58,52 @@ function App() {
     setUserProductDataList([])
   }
 
-  // TO CLOSE ADD PRODUCT COMPONENT
 
-  function cancelAddProductCompFun(ID){
-    setAddProductComp(addProductComp.filter((id)=> id !== ID));
+  //GET VALUE OF USER PERSONAL INPUT
+  function handleUserInput(e) {
+    const { name, value } = e.target
+    setUserPersonalDetails((usersdata) => ({
+      ...usersdata,
+      [name]: value
+    }))
   }
+
+    //ADD PRODUCT FUCNTION
+    function addProduct() {
+      // setIsProductModalOpen(true)
+      // setIsOpenAddProductMdal(true)
+      setProductInputLabels(true)
+      const modalId = new Date().getTime().toString();
+      setAddProductComp([...addProductComp, modalId])
+    }
+
+  // GET VALUE OF USER PRODUCTS
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setUserProductInput((prevData) => ({
+      ...prevData,
+      [name]: value
+    }))
+  }
+
+  //SAVE AFTER SET THE PRODUCT VALUES
+  function saveProduct(e) {
+    e.preventDefault()
+    // setIsEditing(null)
+    // setIsOpenAddProductMdal(false)
+    setAfterSaveProduct(true)
+    const newData = { ...userProductInput }
+    setUserProductDataList((prevList) => [...prevList, newData])
+    setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
+  }
+
+
+  // TO CLOSE ADD PRODUCT COMPONENT
+  function cancelAddProductCompFun(compId) {
+    setAddProductComp(addProductComp.filter((id) => id !== compId));
+  }
+
+
 
   // const toggleEditMode = (index) => {
   //   setEditMode((prevState) => ({
@@ -122,20 +138,6 @@ function App() {
   // }
 
 
-  //ADD PRODUCT FUCNTION
-  function addProduct() {
-    setIsProductModalOpen(true)
-    setIsOpenAddProductMdal(true)
-    setProductInputLabels(true)
-
-    const modalId = new Date().getTime().toString();
-    setAddProductComp([...addProductComp, modalId])
-
-  }
-
-
-
-
   //SAVE PRODUCT INFO AFTER EDIT
   // function saveProduct(e) {
   //   e.preventDefault()
@@ -147,18 +149,13 @@ function App() {
   //   setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
   // }
 
-  //ADD PRODUCT MODAL
-  // const AddProductModal = () => {
-  //   return (
-  //   )
-  // }
 
 
   //EDIT PRODUCT INPUT AFTER SAVE
   function handleEdit(index) {
     setIsEditing(index);
     console.log('isEditing', isEditing)
-    // setUserProductInput(userPeroductDataList[index]);
+    setUserProductInput(userPeroductDataList[index]);
   }
 
   //DELETE AFTER EDIT
@@ -169,54 +166,51 @@ function App() {
   }
 
   //PRODUCT MODEL
-  const Productmodal = () => {
+
+  // <div>
+  // <form>
+  //   <div className='fetchedDataSection'>
+  //     <div>
+  //       {isOpenAddProductModal && <ProductComp />}
+  //     </div>
+  //   </div>
+  // </form>
+
+  {userPeroductDataList.map((Value, Index) => {
     return (
-      <div>
-        <form>
-          <div className='fetchedDataSection'>
-            <div>
-              {isOpenAddProductModal && <ProductComp />}
-            </div>
+      isEditing === Index ? (
+
+        <div style={{ display: "flex" }}>
+          <div className='addproductInput'>
+            {/* <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}></input>
+            <input name='productName' value={userProductInput.productName} className='productInput' type="text" placeholder='Product Name' onChange={handleChange}></input>
+            <input name='Price' value={userProductInput.Price} className='productInput' type="number" placeholder='Price' onChange={handleChange}></input>
+            <input name='quantity' value={userProductInput.quantity} className='productInput' type="number" placeholder='Quantity' onChange={handleChange}></input>
+            <button onClick={saveProduct}>Save</button> */}
           </div>
-        </form>
+        </div>
 
-        {userPeroductDataList.map((Value, Index) => {
-          return (
-            isEditing === Index ? (
-
-              <div style={{ display: "flex" }}>
-                <div className='addproductInput'>
-                  {/* <input name='serialNumber' value={userProductInput.serialNumber} className='productInput' type="number" placeholder='Serial Number' onChange={handleChange}></input>
-                  <input name='productName' value={userProductInput.productName} className='productInput' type="text" placeholder='Product Name' onChange={handleChange}></input>
-                  <input name='Price' value={userProductInput.Price} className='productInput' type="number" placeholder='Price' onChange={handleChange}></input>
-                  <input name='quantity' value={userProductInput.quantity} className='productInput' type="number" placeholder='Quantity' onChange={handleChange}></input>
-                  <button onClick={saveProduct}>Save</button> */}
-                </div>
+      )
+        :
+        (
+          afterSaveProduct && (
+            <div style={{ display: 'flex' }}>
+              <div key={Index} className='savedProductData'>
+                <p>{Value.serialNumber}</p>
+                <p>{Value.productName}</p>
+                <p>{Value.Price}</p>
+                <p>{Value.quantity}</p>
               </div>
-
-            )
-              :
-              (
-                afterSaveProduct && (
-                  <div style={{ display: 'flex' }}>
-                    <div key={Index} className='savedProductData'>
-                      <p>{Value.serialNumber}</p>
-                      <p>{Value.productName}</p>
-                      <p>{Value.Price}</p>
-                      <p>{Value.quantity}</p>
-                    </div>
-                    <div style={{ display: 'flex' }}>
-                      <button onClick={() => handleEdit(Index)}>Edit</button>
-                      <button onClick={() => handleDelete(Index)}>Delete</button>
-                    </div>
-                  </div>
-                )
-              )
-          );
-        })}
-      </div>
+              <div style={{ display: 'flex' }}>
+                <button onClick={() => handleEdit(Index)}>Edit</button>
+                <button onClick={() => handleDelete(Index)}>Delete</button>
+              </div>
+            </div>
+          )
+        )
     );
-  };
+  })}
+// </div>
 
 
 
@@ -382,8 +376,8 @@ function App() {
             <ProductComp  isEditing={setIsEditing}/>
           } */}
 
-          {addProductComp.map((ID) => (
-            <ProductComp key={ID} isEditing={setIsEditing} cancelProductComp={cancelAddProductCompFun} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={handleChange} saveProductFunction={saveProduct} serialNumberValue={userProductInput.serialNumber}  productNameValue={userProductInput.productName} priceValue = {userProductInput.Price} quantityValue={userProductInput.quantity} />
+          {addProductComp.map((Id) => (
+            <ProductComp key={Id} isEditing={setIsEditing} cancelProductComp={() => cancelAddProductCompFun(Id)} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={handleChange} saveProductFunction={saveProduct} serialNumberValue={userProductInput.serialNumber} productNameValue={userProductInput.productName} priceValue={userProductInput.Price} quantityValue={userProductInput.quantity} />
 
           ))
           }
@@ -412,7 +406,7 @@ function App() {
 
 export default App;
 
-  // Function to close a modal
+// Function to close a modal
 //   const closeModal = (modalId) => {
 //     setModals(modals.filter((id) => id !== modalId));
 //   };
