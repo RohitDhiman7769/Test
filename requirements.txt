@@ -6,16 +6,15 @@ import ProductComp from './ProductComp';
 function App() {
 
   //GET VALUE OF USERPERSONAL DETAILS
+  const [userProductInput, setUserProductInput] = useState([])
   const [userPersonalDetails, setUserPersonalDetails] = useState({ username: '', userdiscription: '', usercountry: '', userstate: '', userpincode: '' })
 
+  console.log(userProductInput)
   const [saveProductInput, setSaveProductInput] = useState(false)
-  const [afterSaveProduct, setAfterSaveProduct] = useState(false)
-
-  const [userProductInput, setUserProductInput] = useState([])
   const [userPeroductDataList, setUserProductDataList] = useState([])
   const [isEditing, setIsEditing] = useState(null);
   const [productInputLabels, setProductInputLabels] = useState(false)
-  
+
   //PRODUCT MAP STATE
   const [addProductComp, setAddProductComp] = useState([])
 
@@ -27,7 +26,7 @@ function App() {
 
       const dataToSend = {
         userPersonalDetails: userPersonalDetails,
-        userPeroductDataList: userPeroductDataList,
+        userProductDataList: userProductInput,
       };
 
       const response = await axios.post('http://localhost:3001/Data-inserted',
@@ -58,7 +57,6 @@ function App() {
   //ADD PRODUCT FUCNTION
   function addProduct() {
     setProductInputLabels(true);
-    const modalId = new Date().getTime().toString();
     const newArray = [...addProductComp];
     newArray.push({ product_name: '' });
     setAddProductComp(newArray);
@@ -79,12 +77,15 @@ function App() {
 
 
   //SAVE AFTER SET THE PRODUCT VALUES
-  function saveProduct(e) {
+  function saveProduct(e, index) {
+    if(isEditing === index){
+      setIsEditing(null)
+    }
     e.preventDefault()
+    setIsEditing(index);
     setIsEditing(null)
-    // setIsOpenAddProductMdal(false)
     setSaveProductInput(true)
-    setAfterSaveProduct(true)
+    // setAfterSaveProduct(true)
     const newData = { ...userProductInput }
     setUserProductDataList((prevList) => [...prevList, newData])
     setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
@@ -92,9 +93,8 @@ function App() {
 
 
   // TO CLOSE ADD PRODUCT COMPONENT
-  function cancelAddProductCompFun(Index, item) {
-    console.log(item)
-    setAddProductComp(addProductComp.filter((id) => id !== Index));
+  function cancelAddProductCompFun(Index) {
+    setAddProductComp(addProductComp.filter((_,id) => id !== Index));
   }
 
 
@@ -113,16 +113,6 @@ function App() {
     setUserProductDataList(updatedUserPeroductDataList);
   }
 
-  //PRODUCT MODEL
-
-  // <div>
-  // <form>
-  //   <div className='fetchedDataSection'>
-  //     <div>
-  //       {isOpenAddProductModal && <ProductComp />}
-  //     </div>
-  //   </div>
-  // </form>
 
   { saveProductInput  &&
     userProductInput.map((Value, Index) => {
@@ -131,27 +121,27 @@ function App() {
 
           <div style={{ display: "flex" }}>
             <div className='addproductInput'>
-               <ProductComp />
+               <ProductComp   key={Index}
+                  isEditing={true}/>
             </div>
           </div>
 
         )
           :
           (
-            afterSaveProduct && (
+         
               <div style={{ display: 'flex' }}>
                 <div key={Index} className='savedProductData'>
-                  <p>{Value.serialNumber}</p>
-                  <p>{Value.productName}</p>
-                  <p>{Value.Price}</p>
-                  <p>{Value.quantity}</p>
+              <p>{Value.serialNumber}</p>
+              <p>{Value.productName}</p> 
+              <p>{Value.Price}</p> 
+              <p>{Value.quantity}</p>
                 </div>
                 <div style={{ display: 'flex' }}>
                   <button onClick={() => handleEdit(Index)}>Edit</button>
                   <button onClick={() => handleDelete(Index)}>Delete</button>
                 </div>
               </div>
-            )
           )
       );
     })
@@ -228,7 +218,7 @@ function App() {
 
               {addProductComp.map((item, index) => (
                 <tr key={index}>
-                  <ProductComp key={index} isEditing={setIsEditing} cancelProductComp={() => cancelAddProductCompFun(index, item)} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={(e)=>{handleChange(e,index)}} saveProductFunction={saveProduct} serialNumberValue={item} />
+                  <ProductComp key={item.id} isEditing={setIsEditing  === index} cancelProductComp={() => cancelAddProductCompFun(index, item)} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={(e)=>{handleChange(e,index)}} saveProductFunction={(e)=>saveProduct(e,index)} serialNumberValue={item} />
                 </tr>
               ))
               }
