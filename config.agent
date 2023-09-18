@@ -1,15 +1,16 @@
 
-export default function Productmodal({saveBtn, cancelBtn, cancelAddProductCompFun, inputHandleChange, saveProductFunction, serialNumberValue, productNameValue, priceValue, quantityValue}){
+export default function Productmodal({saveBtn, cancelBtn, cancelProductComp, saveProductFunction, inputHandleChange,  serialNumberValue, productNameValue, priceValue, quantityValue}){
 
     return(
         <div style={{ display: "flex" }}>
         <div className='addproductInput'>
-          <input name='serialNumber' value={serialNumberValue} className='productInput' type="number" placeholder='Serial Number' onChange={inputHandleChange}  ></input>
-          <input name='productName' value={productNameValue} className='productInput' type="text" placeholder='Product Name' onChange={inputHandleChange} ></input>
-          <input name='Price' value={priceValue} className='productInput' type="number" placeholder='Price' onChange={inputHandleChange}></input>
-          <input name='quantity' value={quantityValue} className='productInput' type="number" placeholder='Quantity' onChange={inputHandleChange}></input>
-          <button onClick={{cancelAddProductCompFun}}>{cancelBtn}</button>
-          <button onClick={{saveProductFunction}}>{saveBtn}</button>
+          <input name='serialNumber'  className='productInput' type="number" placeholder='Serial Number' onChange={inputHandleChange}  ></input>
+          <input name='productName'  className='productInput' type="text" placeholder='Product Name' onChange={inputHandleChange} ></input>
+          <input name='Price'  className='productInput' type="number" placeholder='Price' onChange={inputHandleChange}></input>
+          <input name='quantity'  className='productInput' type="number" placeholder='Quantity' onChange={inputHandleChange}></input>
+          <button onClick={cancelProductComp}>{cancelBtn}</button>
+          <button onClick={saveProductFunction}>{saveBtn}</button>
+
 
         </div>
       </div >
