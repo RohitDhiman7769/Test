@@ -1,19 +1,22 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios'
 import './App.css';
 import ProductComp from './ProductComp';
+import FetchedUserData from './FetchedUserData';
 
 function App() {
 
   //GET VALUE OF USERPERSONAL DETAILS
   const [userProductInput, setUserProductInput] = useState([])
   const [userPersonalDetails, setUserPersonalDetails] = useState({ username: '', userdiscription: '', usercountry: '', userstate: '', userpincode: '' })
-
-  console.log(userProductInput)
   const [saveProductInput, setSaveProductInput] = useState(false)
   const [userPeroductDataList, setUserProductDataList] = useState([])
   const [isEditing, setIsEditing] = useState(null);
   const [productInputLabels, setProductInputLabels] = useState(false)
+  const [isDataModalOpen, setIsModalOpen] = useState(false)
+  const [fetchedData, setFetchedData] = useState([])
+
+  const [editMode, setEditMode] = useState(null)
 
   //PRODUCT MAP STATE
   const [addProductComp, setAddProductComp] = useState([])
@@ -63,22 +66,22 @@ function App() {
   }
 
   // GET VALUE OF USER PRODUCTS
-  const handleChange = (e,index) => { 
+  const handleChange = (e, index) => {
     const { name, value } = e.target
     setUserProductInput((prevData) => ({
       ...prevData,
-      [index]:{
+      [index]: {
         ...prevData[index],
-        [name]:value
+        [name]: value
 
       }
     }))
-  }  
+  }
 
 
   //SAVE AFTER SET THE PRODUCT VALUES
   function saveProduct(e, index) {
-    if(isEditing === index){
+    if (isEditing === index) {
       setIsEditing(null)
     }
     e.preventDefault()
@@ -94,7 +97,11 @@ function App() {
 
   // TO CLOSE ADD PRODUCT COMPONENT
   function cancelAddProductCompFun(Index) {
-    setAddProductComp(addProductComp.filter((_,id) => id !== Index));
+    if (addProductComp.length == 1) {
+      setProductInputLabels(false);
+
+    }
+    setAddProductComp(addProductComp.filter((_, id) => id !== Index));
   }
 
 
@@ -114,37 +121,38 @@ function App() {
   }
 
 
-  { saveProductInput  &&
-    userProductInput.map((Value, Index) => {
-      return (
-        isEditing === Index ? (
+  {
+    saveProductInput &&
+      userProductInput.map((Value, Index) => {
+        return (
+          isEditing === Index ? (
 
-          <div style={{ display: "flex" }}>
-            <div className='addproductInput'>
-               <ProductComp   key={Index}
-                  isEditing={true}/>
+            <div style={{ display: "flex" }}>
+              <div className='addproductInput'>
+                <ProductComp key={Index}
+                  isEditing={true} />
+              </div>
             </div>
-          </div>
 
-        )
-          :
-          (
-         
+          )
+            :
+            (
+
               <div style={{ display: 'flex' }}>
                 <div key={Index} className='savedProductData'>
-              <p>{Value.serialNumber}</p>
-              <p>{Value.productName}</p> 
-              <p>{Value.Price}</p> 
-              <p>{Value.quantity}</p>
+                  <p>{Value.serialNumber}</p>
+                  <p>{Value.productName}</p>
+                  <p>{Value.Price}</p>
+                  <p>{Value.quantity}</p>
                 </div>
                 <div style={{ display: 'flex' }}>
                   <button onClick={() => handleEdit(Index)}>Edit</button>
                   <button onClick={() => handleDelete(Index)}>Delete</button>
                 </div>
               </div>
-          )
-      );
-    })
+            )
+        );
+      })
   }
   // </div>
 
@@ -152,19 +160,54 @@ function App() {
 
   //USER DATA FETCHED FUNCTION
   async function checkData() {
-    // setIsInfo(false)
-    // setIsDataModalOpen(true)
+    setIsModalOpen(true)
     try {
-
       const response = await axios.get('http://localhost:3001/Fetch-Data',)
-      // setFetchData(response.data)
-      console.log(response)
-
+      setFetchedData(response.data)
     } catch (err) {
       console.log(err)
     }
   }
 
+
+
+  const handleInputChange = (index, fieldName, value) => {
+    const updatedData = [...fetchedData];
+    updatedData[index][fieldName] = value;
+    setFetchedData(updatedData);
+  };
+
+  //DELETE  FUNCTION
+  // const deleteItem = (index) => {
+  //   const updatedData = [...fetchedData];
+  //   updatedData.splice(index, 1);
+  //   setFetchedData(updatedData);
+  // };
+
+
+
+  //TO CANCEL FUNCTION
+  const cancelEdit = (index) => {
+    // toggleEditMode(index);
+    // console.log(index)
+  }
+
+  //SAVE CHANGES FUNCTION
+  // const saveChanges = (index) => {
+  //   toggleEditMode(index);
+  // }
+
+
+  //SAVE PRODUCT INFO AFTER EDIT
+  function saveChanges(e) {
+    e.preventDefault()
+    // setIsEditing(null)
+    // setIsOpenAddProductMdal(false)
+    // setAfterSaveProduct(true)
+    // const newData = { ...userProductInput }
+    // setUserProductDataList((prevList) => [...prevList, newData])
+    // setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
+  }
 
 
 
@@ -218,7 +261,7 @@ function App() {
 
               {addProductComp.map((item, index) => (
                 <tr key={index}>
-                  <ProductComp key={item.id} isEditing={setIsEditing  === index} cancelProductComp={() => cancelAddProductCompFun(index, item)} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={(e)=>{handleChange(e,index)}} saveProductFunction={(e)=>saveProduct(e,index)} serialNumberValue={item} />
+                  <ProductComp key={item.id} isEditing={setIsEditing === index} cancelProductComp={() => cancelAddProductCompFun(index, item)} saveBtn='Save' cancelBtn='Cancel' inputHandleChange={(e) => { handleChange(e, index) }} saveProductFunction={(e) => saveProduct(e, index)} serialNumberValue={item} />
                 </tr>
               ))
               }
@@ -242,9 +285,9 @@ function App() {
       {/* FETCH DATA BUTTON */}
       <button onClick={checkData} className='viewDatabtn'>View Data</button>
 
-      {/* {isDataModalOpen &&
-        <Datamodal />
-      } */}
+      {isDataModalOpen &&
+        < FetchedUserData productData={fetchedData} editMode={editMode} dataHandleInputChange={handleInputChange} saveDataChanges={saveChanges} cancelIfDataEdit={cancelEdit}  checkData={checkData} />
+      }
 
     </div>
   );
@@ -254,145 +297,7 @@ export default App;
 
 // serialNumber} productNameValue={userProductInput.productName} priceValue={userProductInput.Price} quantityValue={userProductInput.quantity}
 
-  //FETCHED USER DATA MODEL
-  // const Datamodal = () => {
-  //   return (
-  //     <div>
-  //       {(isInfo === true) ?
-  //         // IF NO DATA LABEL
-  //         <div>
-  //           <p>No Data Found</p>
-  //         </div>
-  //         :
-  //         // FETCHED DATA LABEL
-  //         <div className='dataContainer'>
-  //           <table>
-  //             <tr>
-  //               {/* DATA HEADER */}
-  //               <th>
-  //                 <div className='label'>
-  //                   <p>Name</p>
-  //                   <p>Discription</p>
-  //                   <p>Country</p>
-  //                   <p>State</p>
-  //                   <p>Pin Code</p>
-  //                   <p>Serial Number</p>
-  //                   <p>Product Name</p>
-  //                   <p>Price</p>
-  //                   <p>Quantity</p>
-  //                 </div>
-  //               </th>
-  //             </tr>
-  //             <tr>
-  //               <td>
-  //                 {/* USER FETCHED dATA */}
-  //                 {fetchedData.length && fetchedData.map((data, index) => {
-  //                   return (
-  //                     <div key={index} className='userData'>
-  //                       {(editMode[index]) ?
-
-  //                         <div className='fetcheduserdata'>
-  //                           <tr>
-
-  //                             <div style={{ display: 'flex', height: '20px' }}>
-  //                               <input value={data.userName} className='fetchedDataInput' onChange={(e) => handleInputChange(index, 'userName', e.target.value)}></input>
-  //                               <input value={data.userDiscription} className='fetchedDataInput'></input>
-  //                               <input value={data.userCountry} className='fetchedDataInput'></input>
-  //                               <input value={data.userState} className='fetchedDataInput'></input>
-  //                               <input value={data.userPincode} className='fetchedDataInput'></input>
-  //                               <input value={data.serialNumber} className='fetchedDataInput'></input>
-  //                               <input value={data.productName} className='fetchedDataInput'></input>
-  //                               <input value={data.price} className='fetchedDataInput'></input>
-  //                               <input value={data.quantity} className='fetchedDataInput'></input>
-  //                             </div>
-  //                             <div>
-
-  //                               <button onClick={() => saveChanges(index)}>Save</button>
-  //                               <button onClick={() => cancelEdit(index)}>Cancel</button>
-
-  //                             </div>
-  //                           </tr>
-  //                         </div>
-  //                         :
-  //                         (
-  //                           <div style={{ display: 'flex' }}>
-  //                             <div style={{ display: 'flex' }}>
-  //                               <p className='fetchedDataInputLabel' >{data.userName}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.userDiscription}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.userCountry}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.userState}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.userPincode}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.serialNumber}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.productName}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.price}</p>
-  //                               <p className='fetchedDataInputLabel'>{data.quantity} </p>
-  //                             </div>
-  //                             <div>
-  //                               {/* <button>Save</button> */}
-  //                               <button onClick={() => toggleEditMode(index)}>Edit</button>
-  //                               <button onClick={() => deleteItem(index)}>Delete</button>
-  //                             </div>
-  //                           </div>
-  //                         )
-  //                       }
-  //                     </div>
-  //                   );
-  //                 })}
 
 
-  //               </td>
-  //             </tr>
-  //           </table>
-
-  //         </div>
-  //       }
-  //     </div >)
-  // }
-
-
-
-  // const toggleEditMode = (index) => {
-  //   setEditMode((prevState) => ({
-  //     ...prevState,
-  //     [index]: !prevState[index],
-  //   }));
-  // };
-
-  //
-  // const handleInputChange = (index, fieldName, value) => {
-  //   const updatedData = [...fetchedData];
-  //   updatedData[index][fieldName] = value;
-  //   setFetchData(updatedData);
-  // };
-
-  //DELETE NOTES FUNCTION
-  // const deleteItem = (index) => {
-  //   const updatedData = [...fetchedData];
-  //   updatedData.splice(index, 1);
-  //   setFetchData(updatedData);
-  // };
-
-  // TO CANCEL FUNCTION
-  // const cancelEdit = (index) => {
-  //   toggleEditMode(index);
-  //   // console.log(index)
-  // }
-
-  //SAVE CHANGES FUNCTION
-  // const saveChanges = (index) => {
-  //   toggleEditMode(index);
-  // }
-
-
-  //SAVE PRODUCT INFO AFTER EDIT
-  // function saveProduct(e) {
-  //   e.preventDefault()
-  //   setIsEditing(null)
-  //   setIsOpenAddProductMdal(false)
-  //   setAfterSaveProduct(true)
-  //   const newData = { ...userProductInput }
-  //   setUserProductDataList((prevList) => [...prevList, newData])
-  //   setUserProductInput({ serialNumber: '', productName: '', Price: '', quantity: '' })
-  // }
 
 
